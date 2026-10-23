@@ -719,9 +719,32 @@
         a, button, .nav-dot, .card, .deck-btn, .click-left, .click-right { cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='7' fill='%2306070a' stroke='%23ff3a78' stroke-width='2.5'/%3E%3Ccircle cx='10' cy='10' r='5.5' fill='%2306070a' stroke='%2300dfff' stroke-width='1.1'/%3E%3Cpath d='M7 10h6M10 7v6' stroke='%23f7f7ff' stroke-width='1.2'/%3E%3C/svg%3E") 10 10,pointer !important; }
         #entregas .album-cover { height:280px; max-height:280px; object-fit:contain; background:#071226; }
         @media (max-width:768px) { #entregas .album-cover { height:245px; max-height:245px; } }
+        /* Linha do tempo das entregas */
+        .project-timeline { width:min(920px,100%); margin:45px auto 0; position:relative; padding:0 0 10px; }
+        .project-timeline::before { content:''; position:absolute; top:15px; bottom:15px; left:50%; width:2px; background:linear-gradient(#43dcff,rgba(167,83,255,.8),#43dcff); box-shadow:0 0 14px rgba(50,215,255,.65); }
+        .timeline-item { position:relative; width:50%; padding:0 52px 34px 0; min-height:135px; }
+        .timeline-item:nth-child(even) { margin-left:50%; padding:0 0 34px 52px; }
+        .timeline-dot { position:absolute; right:-17px; top:14px; z-index:2; display:grid; place-items:center; width:34px; height:34px; border:2px solid #8bf0ff; border-radius:50%; background:#07152e; color:#d9f9ff; font:700 .65rem 'Silkscreen',cursive; box-shadow:0 0 17px rgba(80,224,255,.85); }
+        .timeline-item:nth-child(even) .timeline-dot { left:-17px; right:auto; }
+        .timeline-card { padding:22px; border:1px solid rgba(118,216,255,.42); border-radius:16px; background:rgba(7,16,45,.82); box-shadow:0 12px 30px rgba(0,0,0,.22); transition:transform .25s ease,border-color .25s ease; }
+        .timeline-card:hover { transform:translateY(-5px); border-color:#71ecff; }
+        .timeline-card h3 { margin:4px 0 9px; color:var(--primary); font-size:1.15rem; }.timeline-card p { margin:0 0 13px; font-size:.9rem; opacity:.9; }
+        .timeline-meta { color:#9befff; font:.62rem 'Silkscreen',cursive; letter-spacing:.08em; }.timeline-card .badge { margin-top:10px; }
+        .timeline-item.pending .timeline-dot { border-color:#7c769a; color:#a09ab5; box-shadow:none; }.timeline-item.pending .timeline-card { opacity:.78; }
+        .album-preview { position:relative; width:100%; margin:13px 0 4px; padding:0; overflow:hidden; border:1px solid #4bdcff; border-radius:11px; background:#050b1d; aspect-ratio:3/4; cursor:pointer; }
+        .album-preview img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .45s ease,filter .45s ease; }.album-preview:hover img { transform:scale(1.05); filter:brightness(1.12); }
+        .album-preview span { position:absolute; bottom:0; left:0; right:0; padding:9px; background:linear-gradient(transparent,rgba(0,0,0,.92)); color:#fff; font:.62rem 'Silkscreen',cursive; letter-spacing:.05em; }
+        .album-zoom { position:fixed; inset:0; z-index:9999; display:none; place-items:center; padding:28px; background:rgba(0,0,12,.9); backdrop-filter:blur(9px); }.album-zoom.open { display:grid; }
+        .album-zoom img { max-width:min(92vw,780px); max-height:86vh; border:2px solid #4bdcff; border-radius:14px; box-shadow:0 0 55px rgba(59,202,255,.6); }.album-zoom button { position:absolute; top:22px; right:26px; width:42px; height:42px; border:1px solid #fff; border-radius:50%; background:#06112b; color:#fff; font-size:1.5rem; }
+        @media (max-width:700px) { .project-timeline::before { left:17px; }.timeline-item,.timeline-item:nth-child(even) { width:100%; margin:0; padding:0 0 26px 55px; }.timeline-dot,.timeline-item:nth-child(even) .timeline-dot { left:0; right:auto; }.timeline-card { padding:18px; } }
     </style>
 </head>
 <body>
+
+    <div class="album-zoom" id="albumZoom" role="dialog" aria-modal="true" aria-label="Capa do álbum ampliada" onclick="closeAlbumZoom(event)">
+        <img src="album_versao2.png" alt="Capa ampliada do álbum Holy">
+        <button type="button" aria-label="Fechar capa ampliada" onclick="closeAlbumZoom()">×</button>
+    </div>
 
     <div class="space-scene" aria-hidden="true"></div>
     <div class="meteor-rain" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
@@ -873,87 +896,36 @@
             <h2 class="section-title" style="text-align: center;">Minhas <span>Entregas</span></h2>
             <p style="text-align: center; margin-bottom: 25px; opacity: 0.7; font-size: 0.9rem;">Navegue pelos projetos concluídos e futuros trabalhos.</p>
 
-            <div class="flashcards-deck-wrapper">
-                <div class="flashcards-container" id="entregasDeck">
-
-                    <div class="card active album-card">
-                        <div class="card-click-overlay">
-                            <div class="click-left" onclick="prevEntregaCard(event)">&lt;</div>
-                            <div class="click-right" onclick="nextEntregaCard(event)">&gt;</div>
-                        </div>
-                        <div class="card-content album-info">
-                            <h3 class="card-title">Capa do Meu Álbum</h3>
-                            <span class="card-date">[PREENCHER DATA]</span>
-                            <p class="card-desc">O que aprendi: [PREENCHER O QUE APRENDEU]</p>
-                        </div>
-                        <img class="album-cover" src="holy-album-cover.png" alt="Capa do álbum Holy: a vida é curta, aproveite">
-                        <div class="album-actions">
-                            <a href="[PREENCHER LINK GITHUB]" target="_blank" class="animated-link" style="margin-top: 15px; display: inline-block;">Acessar projeto no GitHub</a>
-                            <div><span class="badge concluida">Concluída</span></div>
-                        </div>
+            <div class="project-timeline" aria-label="Linha do tempo de projetos">
+                <article class="timeline-item featured">
+                    <div class="timeline-dot" aria-hidden="true">01</div>
+                    <div class="timeline-card album-timeline-card">
+                        <div class="timeline-meta">PROJETO CONCLUÍDO • 2026</div>
+                        <h3>Capa do Meu Álbum</h3>
+                        <p>Criação visual da capa do álbum <strong>Holy — A vida é curta, aproveite.</strong></p>
+                        <button class="album-preview" type="button" onclick="openAlbumZoom()" aria-label="Ampliar capa do álbum">
+                            <img src="album_versao2.png" alt="Capa do álbum Holy: a vida é curta, aproveite">
+                            <span>CLIQUE PARA AMPLIAR +</span>
+                        </button>
+                        <span class="badge concluida">Concluída</span>
                     </div>
-
-                    <div class="card">
-                        <div class="card-click-overlay">
-                            <div class="click-left" onclick="prevEntregaCard(event)">&lt;</div>
-                            <div class="click-right" onclick="nextEntregaCard(event)">&gt;</div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">Dashboard Quem Sou Eu</h3>
-                            <span class="card-date">[PREENCHER DATA]</span>
-                            <p class="card-desc">O que aprendi: [PREENCHER O QUE APRENDEU]</p>
-                            <a href="[PREENCHER LINK GITHUB]" target="_blank" class="animated-link" style="margin-top: 15px; display: inline-block;">Acessar projeto no GitHub</a>
-                            <div><span class="badge concluida">Concluída</span></div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-click-overlay">
-                            <div class="click-left" onclick="prevEntregaCard(event)">&lt;</div>
-                            <div class="click-right" onclick="nextEntregaCard(event)">&gt;</div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">Árvore das Profissões 2.0</h3>
-                            <span class="card-date">[PREENCHER DATA]</span>
-                            <p class="card-desc">O que aprendi: [PREENCHER O QUE APRENDEU]</p>
-                            <a href="[PREENCHER LINK GITHUB]" target="_blank" class="animated-link" style="margin-top: 15px; display: inline-block;">Acessar projeto no GitHub</a>
-                            <div><span class="badge concluida">Concluída</span></div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-click-overlay">
-                            <div class="click-left" onclick="prevEntregaCard(event)">&lt;</div>
-                            <div class="click-right" onclick="nextEntregaCard(event)">&gt;</div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">Âncoras de Carreira</h3>
-                            <span class="card-date">Em andamento...</span>
-                            <p class="card-desc">O que aprendi: [PREENCHER QUANDO ACABAR]</p>
-                            <div><span class="badge em-breve">Em breve</span></div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-click-overlay">
-                            <div class="click-left" onclick="prevEntregaCard(event)">&lt;</div>
-                            <div class="click-right" onclick="nextEntregaCard(event)">&gt;</div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">Manifesto</h3>
-                            <span class="card-date">Em andamento...</span>
-                            <p class="card-desc">O que aprendi: [PREENCHER QUANDO ACABAR]</p>
-                            <div><span class="badge em-breve">Em breve</span></div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="deck-controls">
-                    <button class="deck-btn" onclick="prevEntregaCard()">&larr;</button>
-                    <span class="deck-counter"><span id="currentEntregaIndex">1</span> / <span id="totalEntregasCards">5</span></span>
-                    <button class="deck-btn" onclick="nextEntregaCard()">&rarr;</button>
-                </div>
+                </article>
+                <article class="timeline-item">
+                    <div class="timeline-dot" aria-hidden="true">02</div>
+                    <div class="timeline-card"><div class="timeline-meta">PROJETO CONCLUÍDO</div><h3>Dashboard Quem Sou Eu</h3><p>O que aprendi: [PREENCHER O QUE APRENDEU]</p><a href="[PREENCHER LINK GITHUB]" target="_blank" class="animated-link">Acessar projeto no GitHub</a><div><span class="badge concluida">Concluída</span></div></div>
+                </article>
+                <article class="timeline-item">
+                    <div class="timeline-dot" aria-hidden="true">03</div>
+                    <div class="timeline-card"><div class="timeline-meta">PROJETO CONCLUÍDO</div><h3>Árvore das Profissões 2.0</h3><p>O que aprendi: [PREENCHER O QUE APRENDEU]</p><a href="[PREENCHER LINK GITHUB]" target="_blank" class="animated-link">Acessar projeto no GitHub</a><div><span class="badge concluida">Concluída</span></div></div>
+                </article>
+                <article class="timeline-item pending">
+                    <div class="timeline-dot" aria-hidden="true">04</div>
+                    <div class="timeline-card"><div class="timeline-meta">EM ANDAMENTO</div><h3>Âncoras de Carreira</h3><p>O que aprendi: [PREENCHER QUANDO ACABAR]</p><span class="badge em-breve">Em breve</span></div>
+                </article>
+                <article class="timeline-item pending">
+                    <div class="timeline-dot" aria-hidden="true">05</div>
+                    <div class="timeline-card"><div class="timeline-meta">EM ANDAMENTO</div><h3>Manifesto</h3><p>O que aprendi: [PREENCHER QUANDO ACABAR]</p><span class="badge em-breve">Em breve</span></div>
+                </article>
             </div>
         </section>
 
@@ -1173,7 +1145,8 @@
         const entregaCards = document.querySelectorAll('#entregasDeck .card');
         const totalEntregaCards = entregaCards.length;
 
-        document.getElementById('totalEntregasCards').textContent = totalEntregaCards;
+        const totalEntregasLabel = document.getElementById('totalEntregasCards');
+        if (totalEntregasLabel) totalEntregasLabel.textContent = totalEntregaCards;
 
         function updateEntregasDeck() {
             entregaCards.forEach((card, index) => {
@@ -1188,7 +1161,8 @@
                 }
             });
 
-            document.getElementById('currentEntregaIndex').textContent = currentEntregaIndex + 1;
+            const currentEntregaLabel = document.getElementById('currentEntregaIndex');
+            if (currentEntregaLabel) currentEntregaLabel.textContent = currentEntregaIndex + 1;
         }
 
         function nextEntregaCard(event) {
@@ -1201,6 +1175,16 @@
             if(event) event.stopPropagation();
             currentEntregaIndex = (currentEntregaIndex - 1 + totalEntregaCards) % totalEntregaCards;
             updateEntregasDeck();
+        }
+
+        function openAlbumZoom() {
+            document.getElementById('albumZoom').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeAlbumZoom(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('albumZoom').classList.remove('open');
+            document.body.style.overflow = '';
         }
 
         /* TEIA DO HOMEM-ARANHA */
